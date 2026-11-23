@@ -1,0 +1,12 @@
+{
+  "name": "hosting-check",
+  "version": "1.0.0",
+  "description": "Тестовый сайт для проверки Node.js хостинга",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
