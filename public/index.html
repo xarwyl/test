@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Проверка Node.js хостинга</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      display: flex;
+      justify-content: center;
+      padding: 40px 20px;
+      margin: 0;
+    }
+    .card {
+      background: #1e293b;
+      padding: 24px;
+      border-radius: 12px;
+      max-width: 480px;
+      width: 100%;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+    h1 { margin-top: 0; font-size: 1.4rem; color: #38bdf8; }
+    .status-box {
+      background: #0f172a;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-family: monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    .row { display: flex; gap: 10px; }
+    input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #334155;
+      background: #0f172a;
+      color: #fff;
+    }
+    button {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      background: #38bdf8;
+      color: #0f172a;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover { background: #7dd3fc; }
+    #echoResult {
+      margin-top: 15px;
+      font-size: 0.95rem;
+      color: #4ade80;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Проверка связи с Node.js</h1>
+    
+    <div class="status-box" id="statusBox">
+      Загрузка данных с сервера...
+    </div>
+
+    <div class="row">
+      <input type="text" id="msgInput" placeholder="Напиши что-нибудь..." />
+      <button onclick="sendMessage()">Отправить</button>
+    </div>
+    <div id="echoResult"></div>
+  </div>
+
+  <script>
+    // 1. Проверяем GET-запрос при открытии страницы
+    async function checkServer() {
+      const box = document.getElementById('statusBox');
+      try {
+        const res = await fetch('/api/status');
+        const data = await res.json();
+        box.innerHTML = `
+          Статус API: <b style="color:#4ade80">${data.status}</b><br>
+          Версия Node.js: ${data.nodeVersion}<br>
+          ОС сервера: ${data.platform}<br>
+          Аптайм: ${data.uptimeSeconds} сек.<br>
+          Время сервера: ${data.serverTime}
+        `;
+      } catch (err) {
+        box.innerHTML = `<span style="color:#f87171">Ошибка связи с бэкендом: ${err.message}</span>`;
+      }
+    }
+
+    // 2. Проверяем POST-запрос по кнопке
+    async function sendMessage() {
+      const input = document.getElementById('msgInput');
+      const resultDiv = document.getElementById('echoResult');
+      if (!input.value.trim()) return;
+
+      try {
+        const res = await fetch('/api/echo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: input.value })
+        });
+        const data = await res.json();
+        resultDiv.textContent = data.reply || data.error;
+        input.value = '';
+      } catch (err) {
+        resultDiv.style.color = '#f87171';
+        resultDiv.textContent = 'Ошибка отправки POST-запроса';
+      }
+    }
+
+    checkServer();
+  </script>
+</body>
+</html>
